@@ -1,3 +1,5 @@
+package filemanager;
+
 import javax.swing.JFrame;
 import javax.swing.JMenu;
 import javax.swing.JMenuItem;
@@ -82,6 +84,7 @@ public class FileManager extends JFrame implements Runnable
     sorters.setEditable(false);
     currentFolder = newF.getAbsolutePath();
   }
+  @Override 
   public void run()
   {
     setSize(1200,700);
@@ -131,12 +134,7 @@ public class FileManager extends JFrame implements Runnable
           viewerPane.addTab((String) table.getValueAt(row, 0), null , new JPanel().add(jsp), (String) table.getValueAt(row, 0));
           viewerPane.setSelectedIndex(viewerPane.getComponentCount()-1);
           indexToTextArea.put(viewerPane.getComponentCount()-1, textArea);
-          try{
-            displayFile();
-          }
-          catch(IOException ex){
-            ex.printStackTrace();
-          }
+          displayFile();
         }
       }
     });
@@ -224,7 +222,7 @@ public class FileManager extends JFrame implements Runnable
       for (int row: rows)
       {
         int modelRow = table.convertRowIndexToModel( row );
-        modelRows.add(Integer.valueOf(modelRow));
+        modelRows.add(Integer.valueOf(modelRow) );
       }
       Collections.sort(modelRows, Collections.reverseOrder());
       DefaultTableModel model = (DefaultTableModel)table.getModel();
@@ -250,7 +248,7 @@ public class FileManager extends JFrame implements Runnable
       for (int row: rows)
       {
         int modelRow = files.convertRowIndexToModel( row );
-        modelRows.add(Integer.valueOf(modelRow));
+        modelRows.add(Integer.valueOf(modelRow) );
       }
       Collections.sort(modelRows, Collections.reverseOrder());
       DefaultTableModel model = (DefaultTableModel)files.getModel();
@@ -279,7 +277,6 @@ public class FileManager extends JFrame implements Runnable
     }
     catch(FileNotFoundException ex){
       System.out.println(ex.getMessage() + " in the specified directory.");
-      System.exit(0);
     }
     catch(IOException e){
       System.out.println(e.getMessage());      
@@ -338,18 +335,23 @@ public class FileManager extends JFrame implements Runnable
       files.setValueAt(directories[k].getName(),k,0);
     }
   }
-  private void displayFile() throws IOException
+  private void displayFile()
   {
-    File file = new File(currentFolder + File.separator + viewerPane.getTitleAt(viewerPane.getSelectedIndex()));
-    FileReader fr = new FileReader(file);
-    int ch;
-    StringBuffer sb = new StringBuffer();
-    while( (ch = fr.read()) !=EOF)
-    {
-      sb.append((char) ch);
+    try{
+      File file = new File(currentFolder + "\\" + viewerPane.getTitleAt(viewerPane.getSelectedIndex()));
+      FileReader fr = new FileReader(file);
+      int ch;
+      StringBuffer sb = new StringBuffer();
+      while( (ch = fr.read()) !=EOF)
+      {
+        sb.append((char) ch);
+      }
+      JTextArea viewer =  indexToTextArea.get(viewerPane.getSelectedIndex());
+      viewer.setText(sb.toString());
     }
-    JTextArea viewer =  indexToTextArea.get(viewerPane.getSelectedIndex());
-    viewer.setText(sb.toString());
+    catch(IOException e){
+      e.printStackTrace();
+    }
   }
   public static void main(String[] args)
   {
