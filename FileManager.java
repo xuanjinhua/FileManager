@@ -71,7 +71,7 @@ public class FileManager extends JFrame implements Runnable
     homeBase = new File(new File(".").getAbsolutePath());
     directories = new File(homeBase.getAbsolutePath()).listFiles(File::isDirectory);
     indexToTextArea = new HashMap<>();
-    newF = new File(homeBase + "\\All-Documents");
+    newF = new File(homeBase + File.separator + "All-Documents");
     mainPanel = new JPanel();
     contentPanel = new JPanel();
     filesPanel = new JPanel();
@@ -115,7 +115,7 @@ public class FileManager extends JFrame implements Runnable
     sorters.setText("");
     for(String str: uploadedFiles)
     {
-      sorters.append(str + "\n");
+      sorters.append(str + System.lineSeparator());
     } 
     makeMenus();
     makeTable();
@@ -154,7 +154,7 @@ public class FileManager extends JFrame implements Runnable
       public void mouseClicked(MouseEvent e) {
         if (e.getClickCount() == 1) {
           int row = files.getSelectedRow();
-          currentFolder = homeBase.getAbsolutePath() + "\\" + files.getValueAt(row,0);
+          currentFolder = homeBase.getAbsolutePath() + File.separator + files.getValueAt(row,0);
           makeTable();
           model.fireTableDataChanged();
         }
@@ -191,14 +191,14 @@ public class FileManager extends JFrame implements Runnable
       if(choice == JFileChooser.APPROVE_OPTION)
       {
         currentFile = jfc.getSelectedFile();
-        savedFile = new File(homeBase.getAbsolutePath() + "\\All-Documents\\" + currentFile.getName());
+        savedFile = new File(homeBase.getAbsolutePath() + File.separator + "All-Documents"+ File.separator + currentFile.getName());
         saveFile();
-        savedFile = new File(currentFolder + "\\" + currentFile.getName());
+        savedFile = new File(currentFolder + File.separator + currentFile.getName());
         saveFile();
         sorters.setText("");
         for(String str: uploadedFiles)
         {
-          sorters.append(str + "\n");
+          sorters.append(str + System.lineSeparator());
         }
         model.addRow(new Object[]{null, null});
         makeTable();
@@ -212,7 +212,7 @@ public class FileManager extends JFrame implements Runnable
       int returnVal = JOptionPane.showConfirmDialog(this, p, "ADD", JOptionPane.YES_NO_OPTION);
       if (returnVal == JOptionPane.OK_OPTION)
       {
-        new File(homeBase.getAbsolutePath()+ "\\" + textField.getText()).mkdir();
+        new File(homeBase.getAbsolutePath()+ File.separator + textField.getText()).mkdir();
         directories = new File(homeBase.getAbsolutePath()).listFiles(File::isDirectory);
         fileModel.addRow(new Object[]{null, null});
         printDirectories();
@@ -241,7 +241,7 @@ public class FileManager extends JFrame implements Runnable
       sorters.setText("");
       for(String str: uploadedFiles)
       {
-        sorters.append(str + "\n");
+        sorters.append(str + System.lineSeparator());
       }
     });
     rmFoldersItem.addActionListener( e -> {
@@ -340,7 +340,7 @@ public class FileManager extends JFrame implements Runnable
   }
   private void displayFile() throws IOException
   {
-    File file = new File(currentFolder + "\\" + viewerPane.getTitleAt(viewerPane.getSelectedIndex()));
+    File file = new File(currentFolder + File.separator + viewerPane.getTitleAt(viewerPane.getSelectedIndex()));
     FileReader fr = new FileReader(file);
     int ch;
     StringBuffer sb = new StringBuffer();
