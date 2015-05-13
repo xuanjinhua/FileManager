@@ -1,5 +1,3 @@
-package filemanager;
-
 import javax.swing.JFrame;
 import javax.swing.JMenu;
 import javax.swing.JMenuItem;
