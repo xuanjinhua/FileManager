@@ -190,29 +190,18 @@ public class FileManager extends JFrame implements Runnable
       int choice = jfc.showOpenDialog(FileManager.this);
       if(choice == JFileChooser.APPROVE_OPTION)
       {
-        try
+        currentFile = jfc.getSelectedFile();
+        savedFile = new File(homeBase.getAbsolutePath() + "\\All-Documents\\" + currentFile.getName());
+        saveFile();
+        savedFile = new File(currentFolder + "\\" + currentFile.getName());
+        saveFile();
+        sorters.setText("");
+        for(String str: uploadedFiles)
         {
-          currentFile = jfc.getSelectedFile();
-          savedFile = new File(homeBase.getAbsolutePath() + "\\All-Documents\\" + currentFile.getName());
-          saveFile();
-          savedFile = new File(currentFolder + "\\" + currentFile.getName());
-          saveFile();
-          sorters.setText("");
-          for(String str: uploadedFiles)
-          {
-            sorters.append(str + "\n");
-          }
-          model.addRow(new Object[]{null, null});
-          makeTable();
+          sorters.append(str + "\n");
         }
-        catch(FileNotFoundException ex)
-        {
-          System.out.println("File " + currentFile.getAbsolutePath() + " not found. ");
-        }
-        catch(IOException ex)
-        {
-          ex.printStackTrace();
-        }
+        model.addRow(new Object[]{null, null});
+        makeTable();
       }
     });
     addFoldersItem.addActionListener( e -> {
@@ -278,18 +267,12 @@ public class FileManager extends JFrame implements Runnable
       }
     });
   }
-  private void saveFile() throws IOException
+  private void saveFile()
   {
     try{
-      InputStream in = new FileInputStream(currentFile);
-      OutputStream out = new FileOutputStream(savedFile);
-      byte[] buf = new byte[1024];
-      int len;
-      while ((len = in.read(buf)) > 0){
-        out.write(buf, 0, len);
-      }
-      in.close();
-      out.close();
+      Path newLink = Paths.get((String)savedFile.getAbsolutePath());
+      Path existingFile = Paths.get((String)currentFile.getAbsolutePath());;
+      Files.createLink(newLink, existingFile);
       uploadedFiles = new ArrayList<>(Arrays.asList(newF.list()));
     }
     catch(FileNotFoundException ex){
@@ -298,6 +281,9 @@ public class FileManager extends JFrame implements Runnable
     }
     catch(IOException e){
       System.out.println(e.getMessage());      
+    }
+    catch (UnsupportedOperationException x){
+        System.err.println(x.getMessage());
     }
   }
   public void makeTable()
@@ -314,7 +300,7 @@ public class FileManager extends JFrame implements Runnable
           if(k < table.getRowCount())
           {
             table.setValueAt(file.getName(),k,0);
-            table.setValueAt(attr.creationTime(),k,1);
+            table.setValueAt(attr.lastModifiedTime(),k,1);
             k++;
             while(table.getRowCount() > folder.list().length)
             {
