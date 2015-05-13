@@ -71,7 +71,7 @@ public class FileManager extends JFrame implements Runnable
     homeBase = new File(new File(".").getAbsolutePath());
     directories = new File(homeBase.getAbsolutePath()).listFiles(File::isDirectory);
     indexToTextArea = new HashMap<>();
-    newF = new File(homeBase + "\\All Documents");
+    newF = new File(homeBase + "\\All-Documents");
     mainPanel = new JPanel();
     contentPanel = new JPanel();
     filesPanel = new JPanel();
@@ -193,7 +193,7 @@ public class FileManager extends JFrame implements Runnable
         try
         {
           currentFile = jfc.getSelectedFile();
-          savedFile = new File(homeBase.getAbsolutePath() + "\\All Documents\\" + currentFile.getName());
+          savedFile = new File(homeBase.getAbsolutePath() + "\\All-Documents\\" + currentFile.getName());
           saveFile();
           savedFile = new File(currentFolder + "\\" + currentFile.getName());
           saveFile();
