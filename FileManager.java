@@ -230,9 +230,11 @@ public class FileManager extends JFrame implements Runnable
       DefaultTableModel model = (DefaultTableModel)table.getModel();
       for (Integer row: modelRows)
       {
-          File f = new File(currentFolder + "\\" + table.getValueAt(row, 0));
-          File newf = new File(homeBase.getAbsolutePath() + "\\Trash\\" + table.getValueAt(row, 0));
+          File f = new File(currentFolder + File.separator + table.getValueAt(row, 0));
+          File newf = new File(homeBase.getAbsolutePath() + File.separator + "Trash" + File.separator + table.getValueAt(row, 0));
           f.renameTo(newf);
+          File del = new File(newF + File.separator + table.getValueAt(row, 0));
+          del.delete();
           uploadedFiles.remove(table.getValueAt(row, 0));
           model.removeRow(row);
       }
