@@ -224,7 +224,7 @@ public class FileManager extends JFrame implements Runnable
       for (int row: rows)
       {
         int modelRow = table.convertRowIndexToModel( row );
-        modelRows.add( new Integer(modelRow) );
+        modelRows.add(Integer.valueOf(modelRow));
       }
       Collections.sort(modelRows, Collections.reverseOrder());
       DefaultTableModel model = (DefaultTableModel)table.getModel();
@@ -250,7 +250,7 @@ public class FileManager extends JFrame implements Runnable
       for (int row: rows)
       {
         int modelRow = files.convertRowIndexToModel( row );
-        modelRows.add( new Integer(modelRow) );
+        modelRows.add(Integer.valueOf(modelRow));
       }
       Collections.sort(modelRows, Collections.reverseOrder());
       DefaultTableModel model = (DefaultTableModel)files.getModel();
