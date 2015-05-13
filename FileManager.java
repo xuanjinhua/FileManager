@@ -366,6 +366,6 @@ public class FileManager extends JFrame implements Runnable
   public static void main(String[] args)
   {
     FileManager fm = new FileManager();
-    javax.swing.SwingUtilities.invokeLater(dcms);
+    javax.swing.SwingUtilities.invokeLater(fm);
   }
 } 
