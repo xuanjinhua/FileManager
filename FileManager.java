@@ -336,7 +336,7 @@ public class FileManager extends JFrame implements Runnable
   private void displayFile()
   {
     try{
-      File file = new File(currentFolder + "\\" + viewerPane.getTitleAt(viewerPane.getSelectedIndex()));
+      File file = new File(currentFolder +  File.separator + viewerPane.getTitleAt(viewerPane.getSelectedIndex()));
       FileReader fr = new FileReader(file);
       int ch;
       StringBuffer sb = new StringBuffer();
