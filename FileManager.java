@@ -268,8 +268,8 @@ public class FileManager extends JFrame implements Runnable
   private void saveFile()
   {
     try{
-      Path newLink = Paths.get((String)savedFile.getAbsolutePath());
-      Path existingFile = Paths.get((String)currentFile.getAbsolutePath());;
+      Path newLink = Paths.get(savedFile.getAbsolutePath());
+      Path existingFile = Paths.get(currentFile.getAbsolutePath());;
       Files.createLink(newLink, existingFile);
       uploadedFiles = new ArrayList<>(Arrays.asList(newF.list()));
     }
@@ -292,7 +292,7 @@ public class FileManager extends JFrame implements Runnable
       {
         for(File file: folder.listFiles())
         {
-          Path p = Paths.get((String)file.getAbsolutePath());
+          Path p = Paths.get(file.getAbsolutePath());
           BasicFileAttributes attr = Files.readAttributes(p, BasicFileAttributes.class);
           if(k < table.getRowCount())
           {
