@@ -10,7 +10,6 @@ import javax.swing.JFileChooser;
 import javax.swing.JOptionPane;
 import javax.swing.JTabbedPane;
 import javax.swing.JTable;
-import javax.swing.table.TableModel;
 import javax.swing.table.DefaultTableModel;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -22,15 +21,12 @@ import java.awt.GridLayout;
 import java.awt.BorderLayout;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
+import java.awt.event.WindowEvent;
+import java.awt.event.WindowAdapter;
 import java.io.File;
 import java.io.FileReader;
 import java.io.FileNotFoundException;
 import java.io.IOException;
-import java.io.InputStream;
-import java.io.OutputStream;
-import java.io.FileInputStream;
-import java.io.FileOutputStream;
-import java.time.LocalDate;
 import java.nio.file.attribute.BasicFileAttributes;
 import java.nio.file.Path;
 import java.nio.file.Paths;
@@ -38,26 +34,26 @@ import java.nio.file.Files;
 
 public class FileManager extends JFrame implements Runnable
 {
-  JPanel mainPanel;
-  JTabbedPane viewerPane;
-  JPanel contentPanel;
-  JPanel filesPanel;
-  JPanel sorterPanel;
-  JTable files;
-  JTextArea sorters;
-  DefaultTableModel model; 
-  DefaultTableModel fileModel;
-  JTable table;
-  String currentFolder;
-  String col[] = {"File Name", "Date Added"};
-  String col1[] = {"Folders"};
-  ArrayList<String> uploadedFiles;
-  Map<Integer, JTextArea> indexToTextArea;
-  File newF;
-  File currentFile;
-  File savedFile;
-  File homeBase;
-  File[] directories; 
+  private final JPanel mainPanel;
+  private final JTabbedPane viewerPane;
+  private final JPanel contentPanel;
+  private final JPanel filesPanel;
+  private final JPanel sorterPanel;
+  private JTable files;
+  private final JTextArea sorters;
+  private DefaultTableModel model; 
+  private DefaultTableModel fileModel;
+  private JTable table;
+  public String currentFolder;
+  private final String col[] = {"File Name", "Date Added"};
+  private final String col1[] = {"Folders"};
+  private ArrayList<String> uploadedFiles;
+  private final Map<Integer, JTextArea> indexToTextArea;
+  public File newF;
+  public File currentFile;
+  public File savedFile;
+  public File homeBase;
+  public File[] directories; 
   public static final int EOF;
   static
   {
@@ -114,14 +110,14 @@ public class FileManager extends JFrame implements Runnable
     contentPanel.add(new JScrollPane(files));
     contentPanel.add(new JScrollPane(sorters));
     sorters.setText("");
-    for(String str: uploadedFiles)
-    {
+    uploadedFiles.stream().forEach((str) -> {
       sorters.append(str + System.lineSeparator());
-    } 
+    }); 
     makeMenus();
     makeTable();
     printDirectories();
     table.addMouseListener(new MouseAdapter() {
+      @Override
       public void mouseClicked(MouseEvent e) {
         if (e.getClickCount() == 2) {
           int row = table.getSelectedRow();
@@ -137,6 +133,7 @@ public class FileManager extends JFrame implements Runnable
       }
     });
     viewerPane.addMouseListener(new MouseAdapter() {
+      @Override
       public void mouseClicked(MouseEvent e) {
         if (e.getClickCount() == 2) {
           int i = viewerPane.getSelectedIndex();
@@ -147,6 +144,7 @@ public class FileManager extends JFrame implements Runnable
       }
     });
     files.addMouseListener(new MouseAdapter() {
+      @Override
       public void mouseClicked(MouseEvent e) {
         if (e.getClickCount() == 1) {
           int row = files.getSelectedRow();
@@ -169,13 +167,17 @@ public class FileManager extends JFrame implements Runnable
     mbar.add(fileMenu);
     mbar.add(editMenu);
     JMenuItem addFilesItem = new JMenuItem("Import Files...");
+    JMenuItem makeFilesItem = new JMenuItem("Make Files...");
     JMenuItem addFoldersItem = new JMenuItem("Add Folders...");
     JMenuItem quitItem = new JMenuItem("Quit");
+    JMenuItem editFilesItem = new JMenuItem("Edit File(s)...");
     JMenuItem rmFilesItem = new JMenuItem("Remove File(s)");
     JMenuItem rmFoldersItem = new JMenuItem("Remove Folder(s)");
     fileMenu.add(addFilesItem);
+    fileMenu.add(makeFilesItem);
     fileMenu.add(addFoldersItem);
     fileMenu.add(quitItem);
+    editMenu.add(editFilesItem);
     editMenu.add(rmFilesItem);
     editMenu.add(rmFoldersItem);
     quitItem.addActionListener( e -> {
@@ -192,13 +194,30 @@ public class FileManager extends JFrame implements Runnable
         savedFile = new File(currentFolder + File.separator + currentFile.getName());
         saveFile();
         sorters.setText("");
-        for(String str: uploadedFiles)
-        {
+        uploadedFiles.stream().forEach((str) -> {
           sorters.append(str + System.lineSeparator());
-        }
+        });
         model.addRow(new Object[]{null, null});
         makeTable();
       }
+    });
+    makeFilesItem.addActionListener( e -> {
+      String[] args = new String[1];
+      args[0] = currentFolder;
+      FileEditor fe = new FileEditor(new File(args[0]));
+      fe.run();
+      fe.addWindowListener( new WindowAdapter(){
+        public void windowClosing(WindowEvent e)
+        {
+          fe.setVisible(false);
+          uploadedFiles.add(fe.file.getName());
+          sorters.setText("");
+          uploadedFiles.stream().forEach((str) -> {
+            sorters.append(str + System.lineSeparator());
+          });
+          makeTable();
+        }
+      });
     });
     addFoldersItem.addActionListener( e -> {
       JTextField textField = new JTextField();
@@ -214,45 +233,74 @@ public class FileManager extends JFrame implements Runnable
         printDirectories();
       }
     });
-    rmFilesItem.addActionListener( e -> {
+    editFilesItem.addActionListener( e -> {
+      String[] args = new String[2];
+      args[1] = currentFolder;
       int[] rows = table.getSelectedRows();
-      List<Integer> modelRows = new ArrayList<Integer>(rows.length);     
+      List<Integer> modelRows = new ArrayList<>(rows.length);     
       for (int row: rows)
       {
         int modelRow = table.convertRowIndexToModel( row );
-        modelRows.add(Integer.valueOf(modelRow) );
+        modelRows.add(modelRow);
       }
       Collections.sort(modelRows, Collections.reverseOrder());
       DefaultTableModel model = (DefaultTableModel)table.getModel();
       for (Integer row: modelRows)
       {
-          File f = new File(currentFolder + File.separator + table.getValueAt(row, 0));
-          File newf = new File(homeBase.getAbsolutePath() + File.separator + "Trash" + File.separator + table.getValueAt(row, 0));
-          f.renameTo(newf);
-          File del = new File(newF + File.separator + table.getValueAt(row, 0));
-          del.delete();
-          uploadedFiles.remove(table.getValueAt(row, 0));
-          model.removeRow(row);
+        File f = new File(currentFolder + File.separator + table.getValueAt(row, 0));
+        args[0] = f.getAbsolutePath();
+        FileEditor fe = new FileEditor(new File(args[0]), new File(args[1]));
+        fe.run();
+        fe.addWindowListener( new WindowAdapter(){
+          public void windowClosing(WindowEvent e)
+          {
+            fe.setVisible(false);
+            makeTable();
+          }
+        });
+      }
+    });
+    rmFilesItem.addActionListener( e -> {
+      int[] rows = table.getSelectedRows();
+      List<Integer> modelRows = new ArrayList<>(rows.length);     
+      for (int row: rows)
+      {
+        int modelRow = table.convertRowIndexToModel( row );
+        modelRows.add(modelRow);
+      }
+      Collections.sort(modelRows, Collections.reverseOrder());
+      DefaultTableModel model = (DefaultTableModel)table.getModel();
+      for (Integer row: modelRows)
+      {
+        File f = new File(currentFolder + File.separator + table.getValueAt(row, 0));
+        File newf = new File(homeBase.getAbsolutePath() + File.separator + "Trash" + File.separator + table.getValueAt(row, 0));
+        f.renameTo(newf);
+        if(f.renameTo(newf) == false || new File(currentFolder).getName().equals("Trash"))
+        {
+          f.delete();
+        }
+        File del = new File(newF + File.separator + table.getValueAt(row, 0));
+        del.delete();
+        uploadedFiles.remove(table.getValueAt(row, 0));
+        model.removeRow(row);
       }
       sorters.setText("");
-      for(String str: uploadedFiles)
-      {
+      uploadedFiles.stream().forEach((str) -> {
         sorters.append(str + System.lineSeparator());
-      }
+      });
     });
     rmFoldersItem.addActionListener( e -> {
       int[] rows = files.getSelectedRows();
-      List<Integer> modelRows = new ArrayList<Integer>(rows.length);     
+      List<Integer> modelRows = new ArrayList<>(rows.length);     
       for (int row: rows)
       {
         int modelRow = files.convertRowIndexToModel( row );
-        modelRows.add(Integer.valueOf(modelRow) );
+        modelRows.add(modelRow);
       }
       Collections.sort(modelRows, Collections.reverseOrder());
       DefaultTableModel model = (DefaultTableModel)files.getModel();
-      for (Integer row: modelRows)
-      {
-        File f = new File(homeBase.getAbsolutePath() + "//" + files.getValueAt(row, 0));
+      modelRows.stream().forEach((row) -> {
+        File f = new File(homeBase.getAbsolutePath() + File.separator + files.getValueAt(row, 0));
         if(f.list().length > 0)
         {
           for(File del: f.listFiles())
@@ -262,14 +310,14 @@ public class FileManager extends JFrame implements Runnable
         }
         f.delete();
         model.removeRow(row);
-      }
+      });
     });
   }
   private void saveFile()
   {
     try{
       Path newLink = Paths.get(savedFile.getAbsolutePath());
-      Path existingFile = Paths.get(currentFile.getAbsolutePath());;
+      Path existingFile = Paths.get(currentFile.getAbsolutePath());
       Files.createLink(newLink, existingFile);
       uploadedFiles = new ArrayList<>(Arrays.asList(newF.list()));
     }
@@ -280,7 +328,7 @@ public class FileManager extends JFrame implements Runnable
       System.out.println(e.getMessage());      
     }
     catch (UnsupportedOperationException x){
-        System.err.println(x.getMessage());
+      System.err.println(x.getMessage());
     }
   }
   public void makeTable()
@@ -336,10 +384,10 @@ public class FileManager extends JFrame implements Runnable
   private void displayFile()
   {
     try{
-      File file = new File(currentFolder +  File.separator + viewerPane.getTitleAt(viewerPane.getSelectedIndex()));
+      File file = new File(currentFolder + File.separator + viewerPane.getTitleAt(viewerPane.getSelectedIndex()));
       FileReader fr = new FileReader(file);
       int ch;
-      StringBuffer sb = new StringBuffer();
+      StringBuilder sb = new StringBuilder();
       while( (ch = fr.read()) !=EOF)
       {
         sb.append((char) ch);
@@ -356,4 +404,4 @@ public class FileManager extends JFrame implements Runnable
     FileManager fm = new FileManager();
     javax.swing.SwingUtilities.invokeLater(fm);
   }
-} 
+}
