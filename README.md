@@ -38,4 +38,4 @@ RPBruiser
 
 ## License
 
-Artistic Licensce 2.0
+Apache Licensce 2.0
