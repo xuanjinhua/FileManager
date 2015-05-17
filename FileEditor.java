@@ -1,3 +1,9 @@
+//*********************************************
+// FileEditor V 1.0
+// Author: RPBruiser
+// Date: 05-16-2015
+//*********************************************
+
 import javax.swing.JFrame;
 import javax.swing.JMenu;
 import javax.swing.JMenuItem;
