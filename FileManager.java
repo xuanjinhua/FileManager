@@ -216,7 +216,7 @@ public class FileManager extends JFrame implements Runnable
         public void windowClosing(WindowEvent e)
         {
           fe.setVisible(false);
-           try{
+          try{
             uploadedFiles.add(fe.file.getName());
             sorters.setText("");
             uploadedFiles.stream().forEach((str) -> {
