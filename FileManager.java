@@ -328,7 +328,7 @@ public class FileManager extends JFrame implements Runnable
     try{
       Path newLink = Paths.get(savedFile.getAbsolutePath());
       Path existingFile = Paths.get(currentFile.getAbsolutePath());
-      Files.createSymbolicLink(newLink, existingFile);
+      Files.createLink(newLink, existingFile);
       uploadedFiles = new ArrayList<>(Arrays.asList(newF.list()));
     }
     catch(FileNotFoundException ex){
