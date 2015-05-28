@@ -8,6 +8,7 @@ IMPORTANT: You must have a folder "All-Documents" and a folder "Trash" in the sa
 - [Usage](#usage)
 - [Motivation](#motivation)
 - [API](#api)
+- [Known Issues](#known_issues)
 - [Contributors](#contributors)
 - [License](#license)
 
@@ -31,6 +32,10 @@ I wanted to create an application that would allow me acces to my files in a qui
 
 Java 8: 
 http://docs.oracle.com/javase/8/docs/api/
+
+##Known Issues
+
+On some Unix based OS `Files.createLink()` creates a copy rather than a link.
 
 ## Contributors
 
