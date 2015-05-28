@@ -8,7 +8,7 @@ IMPORTANT: You must have a folder "All-Documents" and a folder "Trash" in the sa
 - [Usage](#usage)
 - [Motivation](#motivation)
 - [API](#api)
-- [Known Issues](#known_issues)
+- [Known Issues](#known-issues)
 - [Contributors](#contributors)
 - [License](#license)
 
